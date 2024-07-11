@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:interview/add_invoice_details.dart';
-import 'package:interview/main.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:interview/invoice_list_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -35,13 +34,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               ElevatedButton(
-                onPressed: () async {
-                  String path = await getDatabasesPath();
-                  await openDatabase('$path/interview.db').then(
-                    (value) {
-                      db = value;
-                    },
-                  );
+                onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -57,7 +50,14 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const InvoiceListScreen(),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,

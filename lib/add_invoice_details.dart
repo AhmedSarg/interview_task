@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:interview/main.dart';
+import 'package:interview/database_controller.dart';
+import 'package:sqflite/sqflite.dart';
 
 class AddInvoiceDetails extends StatefulWidget {
   const AddInvoiceDetails({super.key});
@@ -23,6 +24,21 @@ class AddInvoiceDetails extends StatefulWidget {
 class _AddInvoiceDetailsState extends State<AddInvoiceDetails> {
   int? _unitNumber;
   DateTime? _expiryDate;
+  late Database _database;
+
+  void getData() async {
+    DatabaseHelper.instance.database.then(
+      (value) {
+        _database = value!;
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,31 +150,32 @@ class _AddInvoiceDetailsState extends State<AddInvoiceDetails> {
                   });
                 },
                 onSave: () async {
-                  await db.insert('interview', {
-                    'product_name':
-                        AddInvoiceDetails._productNameController.text,
-                    'unit_number': _unitNumber,
-                    'price': int.parse(AddInvoiceDetails._priceController.text),
-                    'quantity':
-                        int.parse(AddInvoiceDetails._quantityController.text),
-                    'total': int.parse(AddInvoiceDetails._totalController.text),
-                    'expiry_date':
-                        DateFormat('yyyy-MM-dd').format(_expiryDate!),
-                  });
-                  var result = db.query(
-                    'interview',
-                    columns: [
-                      'product_name',
-                      'unit_number',
-                      'price',
-                      'quantity',
-                      'total',
-                      'expiry_date',
-                    ],
+                  await _database.insert(
+                    DatabaseHelper.table,
+                    {
+                      DatabaseHelper.columnProductName:
+                          AddInvoiceDetails._productNameController.text,
+                      DatabaseHelper.columnUnitNumber: _unitNumber,
+                      DatabaseHelper.columnPrice:
+                          int.parse(AddInvoiceDetails._priceController.text),
+                      DatabaseHelper.columnQuantity:
+                          int.parse(AddInvoiceDetails._quantityController.text),
+                      DatabaseHelper.columnTotal:
+                          int.parse(AddInvoiceDetails._totalController.text),
+                      DatabaseHelper.columnExpiryDate:
+                          DateFormat('yyyy-MM-dd').format(_expiryDate!),
+                    },
                   );
-                  print(result);
+                  print(await _database.query(DatabaseHelper.table));
                 },
-                onDelete: () {},
+                onDelete: () async {
+                  await _database.delete(
+                    DatabaseHelper.table,
+                    where:
+                        '${DatabaseHelper.columnProductName} = "${AddInvoiceDetails._productNameController.text}"',
+                  );
+                  print(await _database.query(DatabaseHelper.table));
+                },
               ),
             ],
           ),
